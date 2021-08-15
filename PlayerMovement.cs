@@ -64,7 +64,7 @@ public class PlayerMovement : MonoBehaviour
         spawnLocation = mapLocations[n];
         spawnLocation[1] += 5.0f;
         Vector3 newPosition = spawnLocation - transform.position;
-        controller.Move(newPosition);
+        //controller.Move(newPosition);
     }//end GetRandomSpawn
 
 

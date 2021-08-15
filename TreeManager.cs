@@ -3,32 +3,25 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class TreeManager : MonoBehaviour{
-    float minTerrainHeight;
-    float maxTerrainHeight;
-    public GameObject terrain;
-    public Vector3[] mapLocations;
+
+
     public int maxNumberTrees;
     public GameObject[] treeType;
     public float minSpawnElevation;
     public float maxSpawnElevation;
     public float[] treeSize;
 
+    public void SpawnTree(Vector3 spawnLocation, int index, float theta){
+        GameObject tree = treeType[index];
+        Instantiate(tree, spawnLocation, Quaternion.Euler(0f, theta, 0f));
+    }//
 
-    void Start(){
-        minTerrainHeight = terrain.GetComponent<MeshGenerator>().minTerrainHeight;
-        maxTerrainHeight = terrain.GetComponent<MeshGenerator>().maxTerrainHeight;
-        mapLocations = terrain.GetComponent<MeshGenerator>().vertices;
-        SpawnTrees();
-    }//end Start
+    public void SpawnForest(Vector3[] spawnLocations, float minTerrainHeight, float maxTerrainHeight){
 
-    // Update is called once per frame
-    void Update(){
+        Debug.Log(spawnLocations[0]);
 
-    }//end Update
-
-    void SpawnTrees(){
         //Get the possible spaen locations
-        int max = mapLocations.Length;
+        int max = spawnLocations.Length;
 
         //Don't plant more trees than there are vertices
         maxNumberTrees = Mathf.Min(maxNumberTrees, max);
@@ -38,7 +31,7 @@ public class TreeManager : MonoBehaviour{
 
             //Get a random spawn location (Check if we already got this value?)
             int n = Random.Range(0, max);
-            Vector3 spawnLocation = mapLocations[n];
+            Vector3 spawnLocation = spawnLocations[n];
 
             //Get the normalized height so we can pair with color map
             float height = Mathf.InverseLerp(minTerrainHeight, maxTerrainHeight, spawnLocation.y);
@@ -61,6 +54,6 @@ public class TreeManager : MonoBehaviour{
                 Instantiate(tree, spawnLocation, Quaternion.Euler(0.0f, theta, 0.0f));
             }//check height
         }//loop over tree density
-    }//end SpawnTrees
+    }//end SpawnForest
 
 }//end TreeManager

@@ -11,30 +11,31 @@ public class MeshGenerator : MonoBehaviour {
     int[] triangles;
     Color[] colors;
 
-    public int xSize;
-    public int zSize;
-    public int xLocation = 0;
-    public int yLocation = 0;
-    public int zLocation = 0;
+    private int xSize = 100;
+    private int zSize = 100;
+    private int xLocation = 0;
+    private int yLocation = 0;
+    private int zLocation = 0;
+    private MeshCollider meshCollider;
+
     public int elevation = 10;
     public int seed = 1;
     public int octaves = 1;
     public float redistribution = 1.0f;
     public float frequency = 1.0f;
     public bool debug = false;
-    public Gradient colorGradient;
     public float minTerrainHeight;
     public float maxTerrainHeight;
-    private MeshCollider meshCollider;
+    public Gradient colorGradient;
 
     void Start(){
-        HandleMaxMeshSize();
         mesh = new Mesh();
         meshCollider = GetComponent<MeshCollider>();
         GetComponent<MeshFilter>().mesh = mesh;
         CreateShape();
         UpdateMesh();
     }//end Start
+
 
     void CreateShape(){
         vertices = new Vector3[(xSize + 1)*(zSize + 1)];
@@ -44,7 +45,6 @@ public class MeshGenerator : MonoBehaviour {
                 vertices[i] = new Vector3(x + xLocation,
                                           y + yLocation,
                                           z + zLocation);
-
                 //Keep track of max/min terrain maxTerrainHeight
                 if(y < minTerrainHeight){
                   minTerrainHeight = y;
@@ -52,10 +52,7 @@ public class MeshGenerator : MonoBehaviour {
                 if(y > maxTerrainHeight){
                   maxTerrainHeight = y;
                 }//
-
-                //Increment
                 i++;
-
             }//end x
         }//end z
 
@@ -85,8 +82,8 @@ public class MeshGenerator : MonoBehaviour {
               i++;
           }//end x
         }//end i, z
-
     }//end CreateShape
+
 
     void UpdateMesh(){
         mesh.Clear();
@@ -96,6 +93,7 @@ public class MeshGenerator : MonoBehaviour {
         mesh.RecalculateNormals();
         meshCollider.sharedMesh = mesh;
     }//end UpdateMesh
+
 
     private void OnDrawGizmos(){
         if(vertices == null){
@@ -107,6 +105,7 @@ public class MeshGenerator : MonoBehaviour {
             }//end i
         }//
     }//end OnDrawGizmos
+
 
     private float GetNoise(int x, int z){
         float sampleX = (float)(x)/(float)(xSize) - 0.01f;
@@ -123,13 +122,5 @@ public class MeshGenerator : MonoBehaviour {
         return B*elevation;
     }//end GetNoise
 
-    private void HandleMaxMeshSize(){
-        if(xSize > 100){
-            xSize = 200;
-        }//
-        if(zSize > 100){
-            zSize = 200;
-        }
-    }//end HandleMaxmeshSize
 
 }//end MeshGenerator

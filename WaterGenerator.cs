@@ -28,11 +28,16 @@ public class WaterGenerator : MonoBehaviour {
 
     void Start(){
         //Grab the x/z sizes from the terrain meshCollider
-        xSize = terrain.GetComponent<MeshGenerator>().xSize;
-        zSize = terrain.GetComponent<MeshGenerator>().zSize;
-        xLocation = terrain.GetComponent<MeshGenerator>().xLocation;
-        yLocation = terrain.GetComponent<MeshGenerator>().yLocation;
-        zLocation = terrain.GetComponent<MeshGenerator>().zLocation;
+        //xSize = terrain.GetComponent<MeshGenerator>().xSize;
+        //zSize = terrain.GetComponent<MeshGenerator>().zSize;
+        //xLocation = terrain.GetComponent<MeshGenerator>().xLocation;
+        //yLocation = terrain.GetComponent<MeshGenerator>().yLocation;
+        //zLocation = terrain.GetComponent<MeshGenerator>().zLocation;
+        xSize = 100;
+        zSize = 100;
+        xLocation = 0;
+        yLocation = 0;
+        zLocation = 0;
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
         CreateShape();
