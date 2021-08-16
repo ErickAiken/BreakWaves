@@ -18,8 +18,6 @@ public class TreeManager : MonoBehaviour{
 
     public void SpawnForest(Vector3[] spawnLocations, float minTerrainHeight, float maxTerrainHeight){
 
-        Debug.Log(spawnLocations[0]);
-
         //Get the possible spaen locations
         int max = spawnLocations.Length;
 

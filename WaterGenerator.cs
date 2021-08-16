@@ -10,11 +10,10 @@ public class WaterGenerator : MonoBehaviour {
     public Vector3[] vertices;
     int[] triangles;
     Color[] colors;
-    int xSize;
-    int zSize;
-    int xLocation;
-    int yLocation;
-    int zLocation;
+
+    public int mapSize;
+    public int xOrigin = 0;
+    public int zOrigin = 0;
     public int elevation = 10;
     public int seed = 1;
     public int octaves = 1;
@@ -27,17 +26,6 @@ public class WaterGenerator : MonoBehaviour {
     public GameObject terrain;
 
     void Start(){
-        //Grab the x/z sizes from the terrain meshCollider
-        //xSize = terrain.GetComponent<MeshGenerator>().xSize;
-        //zSize = terrain.GetComponent<MeshGenerator>().zSize;
-        //xLocation = terrain.GetComponent<MeshGenerator>().xLocation;
-        //yLocation = terrain.GetComponent<MeshGenerator>().yLocation;
-        //zLocation = terrain.GetComponent<MeshGenerator>().zLocation;
-        xSize = 100;
-        zSize = 100;
-        xLocation = 0;
-        yLocation = 0;
-        zLocation = 0;
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
         CreateShape();
@@ -45,13 +33,11 @@ public class WaterGenerator : MonoBehaviour {
     }//end Start
 
     void CreateShape(){
-        vertices = new Vector3[(xSize + 1)*(zSize + 1)];
-        for(int z = 0, i = 0; z <= zSize; z++){
-            for(int x = 0; x <= xSize; x++){
-                float y = GetNoise(x, z);
-                vertices[i] = new Vector3(x + xLocation,
-                                          y + yLocation,
-                                          z + zLocation);
+        vertices = new Vector3[(GameData.chunkDimension + 1)*(GameData.chunkDimension + 1)];
+        for(int z = 0, i = 0; z <= GameData.chunkDimension; z++){
+            for(int x = 0; x <= GameData.chunkDimension; x++){
+                float y = GetNoise(x + xOrigin, z + zOrigin);
+                vertices[i] = new Vector3(x,y,z);
 
                 //Keep track of max/min terrain maxTerrainHeight
                 if(y < minTerrainHeight){
@@ -69,15 +55,15 @@ public class WaterGenerator : MonoBehaviour {
 
         int vert = 0;
         int numTriangles = 0;
-        triangles = new int[xSize*zSize*6];
-        for(int z = 0; z < zSize; z++){
-            for(int x = 0; x < xSize; x++){
+        triangles = new int[GameData.chunkDimension*GameData.chunkDimension*6];
+        for(int z = 0; z < GameData.chunkDimension; z++){
+            for(int x = 0; x < GameData.chunkDimension; x++){
                 triangles[numTriangles+0] = vert + 0;
-                triangles[numTriangles+1] = vert + xSize + 1;
+                triangles[numTriangles+1] = vert + GameData.chunkDimension + 1;
                 triangles[numTriangles+2] = vert + 1;
                 triangles[numTriangles+3] = vert + 1;
-                triangles[numTriangles+4] = vert + xSize + 1;
-                triangles[numTriangles+5] = vert + xSize + 2;
+                triangles[numTriangles+4] = vert + GameData.chunkDimension + 1;
+                triangles[numTriangles+5] = vert + GameData.chunkDimension + 2;
                 vert++;
                 numTriangles += 6;
             }//end x
@@ -86,8 +72,8 @@ public class WaterGenerator : MonoBehaviour {
 
         //Handle coloring the terrain
         colors = new Color[vertices.Length];
-        for(int i = 0, z = 0; z <= zSize; z++){
-          for(int x = 0; x <= xSize; x++){
+        for(int i = 0, z = 0; z <= GameData.chunkDimension; z++){
+          for(int x = 0; x <= GameData.chunkDimension; x++){
             float height = Mathf.InverseLerp(minTerrainHeight, maxTerrainHeight, vertices[i].y);
               colors[i] = colorGradient.Evaluate(height);
               i++;
@@ -116,8 +102,8 @@ public class WaterGenerator : MonoBehaviour {
     }//end OnDrawGizmos
 
     private float GetNoise(int x, int z){
-        float sampleX = (float)(x)/(float)(xSize) - 0.01f;
-        float sampleZ = (float)(z)/(float)(zSize) - 0.01f;
+        float sampleX = (float)(x)/(float)(GameData.chunkDimension*mapSize) - 0.01f;
+        float sampleZ = (float)(z)/(float)(GameData.chunkDimension*mapSize) - 0.01f;
         float val = 0.0f;
         float A = 0.0f;
         for(int i = 0; i != octaves; i++){

@@ -3,21 +3,17 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine;
 
-[ExecuteInEditMode]
 public class MeshGenerator : MonoBehaviour {
 
     Mesh mesh;
     public Vector3[] vertices;
     int[] triangles;
     Color[] colors;
-
-    private int xSize = 100;
-    private int zSize = 100;
-    private int xLocation = 0;
-    private int yLocation = 0;
-    private int zLocation = 0;
     private MeshCollider meshCollider;
 
+    public int mapSize;
+    public int xOrigin = 0;
+    public int zOrigin = 0;
     public int elevation = 10;
     public int seed = 1;
     public int octaves = 1;
@@ -38,13 +34,19 @@ public class MeshGenerator : MonoBehaviour {
 
 
     void CreateShape(){
-        vertices = new Vector3[(xSize + 1)*(zSize + 1)];
-        for(int z = 0, i = 0; z <= zSize; z++){
-            for(int x = 0; x <= xSize; x++){
-                float y = GetNoise(x, z);
-                vertices[i] = new Vector3(x + xLocation,
-                                          y + yLocation,
-                                          z + zLocation);
+        vertices = new Vector3[(GameData.chunkDimension + 1)*(GameData.chunkDimension + 1)];
+        for(int z = 0, i = 0; z <= GameData.chunkDimension; z++){
+            for(int x = 0; x <= GameData.chunkDimension; x++){
+                float y = GetNoise(x + xOrigin, z + zOrigin);
+                if(x == 0 && z == 0){
+                    Debug.Log(x);
+                    Debug.Log(y);
+                    Debug.Log(z);
+                    Debug.Log("--");
+                }
+                vertices[i] = new Vector3(x,y,z);
+                GameData.mapLocations[GameData.mapIndex] = new Vector3(x,y,z);
+                GameData.mapIndex++;
                 //Keep track of max/min terrain maxTerrainHeight
                 if(y < minTerrainHeight){
                   minTerrainHeight = y;
@@ -58,15 +60,15 @@ public class MeshGenerator : MonoBehaviour {
 
         int vert = 0;
         int numTriangles = 0;
-        triangles = new int[xSize*zSize*6];
-        for(int z = 0; z < zSize; z++){
-            for(int x = 0; x < xSize; x++){
+        triangles = new int[GameData.chunkDimension*GameData.chunkDimension*6];
+        for(int z = 0; z < GameData.chunkDimension; z++){
+            for(int x = 0; x < GameData.chunkDimension; x++){
                 triangles[numTriangles+0] = vert + 0;
-                triangles[numTriangles+1] = vert + xSize + 1;
+                triangles[numTriangles+1] = vert + GameData.chunkDimension + 1;
                 triangles[numTriangles+2] = vert + 1;
                 triangles[numTriangles+3] = vert + 1;
-                triangles[numTriangles+4] = vert + xSize + 1;
-                triangles[numTriangles+5] = vert + xSize + 2;
+                triangles[numTriangles+4] = vert + GameData.chunkDimension + 1;
+                triangles[numTriangles+5] = vert + GameData.chunkDimension + 2;
                 vert++;
                 numTriangles += 6;
             }//end x
@@ -75,8 +77,8 @@ public class MeshGenerator : MonoBehaviour {
 
         //Handle coloring the terrain
         colors = new Color[vertices.Length];
-        for(int i = 0, z = 0; z <= zSize; z++){
-          for(int x = 0; x <= xSize; x++){
+        for(int i = 0, z = 0; z <= GameData.chunkDimension; z++){
+          for(int x = 0; x <= GameData.chunkDimension; x++){
             float height = Mathf.InverseLerp(minTerrainHeight, maxTerrainHeight, vertices[i].y);
               colors[i] = colorGradient.Evaluate(height);
               i++;
@@ -108,8 +110,8 @@ public class MeshGenerator : MonoBehaviour {
 
 
     private float GetNoise(int x, int z){
-        float sampleX = (float)(x)/(float)(xSize) - 0.01f;
-        float sampleZ = (float)(z)/(float)(zSize) - 0.01f;
+        float sampleX = (float)(x)/(float)(GameData.chunkDimension*mapSize) - 0.01f;
+        float sampleZ = (float)(z)/(float)(GameData.chunkDimension*mapSize) - 0.01f;
         float val = 0.0f;
         float A = 0.0f;
         for(int i = 0; i != octaves; i++){
