@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class MeshGenerator : MonoBehaviour {
 
-    Mesh mesh;
+    public Mesh mesh;
     public Vector3[] vertices;
     int[] triangles;
     Color[] colors;
@@ -24,7 +24,7 @@ public class MeshGenerator : MonoBehaviour {
     public float maxTerrainHeight;
     public Gradient colorGradient;
 
-    void Start(){
+    void Awake(){
         mesh = new Mesh();
         meshCollider = GetComponent<MeshCollider>();
         GetComponent<MeshFilter>().mesh = mesh;
@@ -32,27 +32,25 @@ public class MeshGenerator : MonoBehaviour {
         UpdateMesh();
     }//end Start
 
-
     void CreateShape(){
         vertices = new Vector3[(GameData.chunkDimension + 1)*(GameData.chunkDimension + 1)];
         for(int z = 0, i = 0; z <= GameData.chunkDimension; z++){
             for(int x = 0; x <= GameData.chunkDimension; x++){
                 float y = GetNoise(x + xOrigin, z + zOrigin);
-                if(x == 0 && z == 0){
-                    Debug.Log(x);
-                    Debug.Log(y);
-                    Debug.Log(z);
-                    Debug.Log("--");
-                }
                 vertices[i] = new Vector3(x,y,z);
-                GameData.mapLocations[GameData.mapIndex] = new Vector3(x,y,z);
+                GameData.mapLocations[GameData.mapIndex] = new Vector3(x + xOrigin, y, z + zOrigin);
                 GameData.mapIndex++;
-                //Keep track of max/min terrain maxTerrainHeight
                 if(y < minTerrainHeight){
                   minTerrainHeight = y;
                 }//
                 if(y > maxTerrainHeight){
                   maxTerrainHeight = y;
+                }//
+                if(y < GameData.minTerrainHeight){
+                  GameData.minTerrainHeight = y;
+                }//
+                if(y > GameData.maxTerrainHeight){
+                  GameData.maxTerrainHeight = y;
                 }//
                 i++;
             }//end x
@@ -85,7 +83,6 @@ public class MeshGenerator : MonoBehaviour {
           }//end x
         }//end i, z
     }//end CreateShape
-
 
     void UpdateMesh(){
         mesh.Clear();

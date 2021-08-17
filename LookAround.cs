@@ -12,9 +12,9 @@ public class LookAround : MonoBehaviour{
     }//end Start
 
     void Update(){
-        float delta = GameData.MOUSE_SENSITIVITY * 500.0f;
-        float mouseX = Input.GetAxis("Mouse X")*delta*Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y")*delta*Time.deltaTime;
+        float delta = GameData.MOUSE_SENSITIVITY;
+        float mouseX = Input.GetAxis("Mouse X")*delta;
+        float mouseY = Input.GetAxis("Mouse Y")*delta;
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -45f, 45f);
         transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);

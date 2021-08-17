@@ -23,7 +23,6 @@ public class WaterGenerator : MonoBehaviour {
     public Gradient colorGradient;
     public float minTerrainHeight;
     public float maxTerrainHeight;
-    public GameObject terrain;
 
     void Start(){
         mesh = new Mesh();

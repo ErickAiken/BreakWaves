@@ -8,7 +8,6 @@ public class PlayerMovement : MonoBehaviour
     public Transform groundCheck;
     public LayerMask groundMask;
     public float jumpHeight = 7.5f;
-    public GameObject terrain;
     private float groundDistance = 0.4f;
     private float walkSpeed = 5.0f;
     private float runSpeed = 10.0f;
@@ -18,12 +17,6 @@ public class PlayerMovement : MonoBehaviour
     private float gravity = -9.81f;
     private bool isGrounded;
 
-    // Start is called before the first frame update
-    void Start(){
-      GetRandomSpawn();
-    }//end Start
-
-    // Update is called once per frame
     void Update(){
 
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
@@ -31,10 +24,6 @@ public class PlayerMovement : MonoBehaviour
             velocity.y = -2f;
         }//
 
-        GameData.CLOCK += Time.deltaTime;
-        GameData.playerPosition = new Vector3(transform.position.x,
-                                              transform.position.y,
-                                              transform.position.z);
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
         Vector3 dir = transform.right*x + transform.forward*z;
@@ -55,17 +44,12 @@ public class PlayerMovement : MonoBehaviour
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
 
+        UpdateClock();
+        
     }//end Update
 
-    void GetRandomSpawn(){
-        Vector3[] mapLocations = terrain.GetComponent<MeshGenerator>().vertices;
-        int max = mapLocations.Length;
-        int n = Random.Range(0, max);
-        spawnLocation = mapLocations[n];
-        spawnLocation[1] += 5.0f;
-        Vector3 newPosition = spawnLocation - transform.position;
-        //controller.Move(newPosition);
-    }//end GetRandomSpawn
-
+    void UpdateClock(){
+        GameData.CLOCK += Time.deltaTime;
+    }//end UpdateClock
 
 }//end PlayerMovement
