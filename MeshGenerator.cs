@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class MeshGenerator : MonoBehaviour {
 
-    public Mesh mesh;
+    private Mesh mesh;
     public Vector3[] vertices;
     int[] triangles;
     Color[] colors;
