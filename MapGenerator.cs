@@ -4,28 +4,39 @@ using UnityEngine;
 
 public class MapGenerator : MonoBehaviour{
 
-    [Range(0, 100)]
+    [Range(1, 100)]
     public int chunkLength;
-    [Range(0, 100)]
+    [Range(1, 100)]
     public int chunkWidth;
-    [Range(0, 10)]
+    [Range(1, 10)]
     public int mapSize;
-    [Range(0, 100)]
+    [Range(1, 10)]
     public int mapOctaves;
-    [Range(0, 100)]
+    [Range(1f, 100f)]
     public float mapElevation;
-    [Range(0, 1000)]
+    [Range(1f, 1000f)]
     public float mapSeed;
-    [Range(0, 100)]
+    [Range(1f, 100f)]
     public float mapRedistribution;
-    [Range(0, 100)]
+    [Range(1f, 100f)]
     public float mapFrequency;
-    [Range(0,1)]
-    public int toggleReset;
-    public Gradient colorGradient;
+    [Range(1, 10)]
+    public int waterOctaves;
+    [Range(1f, 100f)]
+    public float waterElevation;
+    [Range(1f, 100f)]
+    public float waterRedistribution;
+    [Range(1f, 100f)]
+    public float waterFrequency;
+    public Gradient terrainColorGradient;
+    public Gradient waterColorGradient;
     public Material mapMaterial;
     public int mapXOrigin;
+    [Range(-100f, 100f)]
+    public float waterLevel;
     public int mapZOrigin;
+    [Range(0,1)]
+    public int toggleReset;
 
     void OnValidate(){
 
@@ -38,9 +49,17 @@ public class MapGenerator : MonoBehaviour{
         }//
 
         //Create the new gameObjects
-        for(int i = 0; i != mapSize; i++){
-            for(int j = 0; j != mapSize; j++){
-                CreateChunk(i*chunkLength,j*chunkWidth);
+        for(int i = 0; i != mapSize + 1; i++){
+            for(int j = 0; j != mapSize + 1; j++){
+                CreateChunkTerrain(i*chunkLength,j*chunkWidth);
+                CreateChunkWater(i*chunkLength, waterLevel, j*chunkWidth);
+            }//end j
+        }//end i
+
+        //Create a border of water
+        for(int i = 0; i != mapSize + 2; i++){
+            for(int j = 0; j != mapSize + 2; j++){
+                //CreateChunkWater(i*chunkLength, j*chun)
             }//end j
         }//end i
     }//
@@ -50,16 +69,16 @@ public class MapGenerator : MonoBehaviour{
     }//end Start
 
 
-    void CreateChunk(int xOrigin, int zOrigin){
-        GameObject chunk = new GameObject("chunk");
+    void CreateChunkTerrain(int xOrigin, int zOrigin){
+        GameObject chunk = new GameObject("chunkTerrain");
         chunk.gameObject.layer = 3;
         chunk.AddComponent<MeshFilter>();
         chunk.AddComponent<MeshRenderer>();
         chunk.AddComponent<MeshCollider>();
         Mesh chunkMesh = new Mesh();
-        Vector3[] vertices = GetVertices(xOrigin + mapXOrigin, zOrigin + mapZOrigin);
+        Vector3[] vertices = GetVertices(xOrigin + mapXOrigin, 0, zOrigin + mapZOrigin, mapOctaves, mapElevation, mapSeed, mapRedistribution, mapFrequency);
         int[] triangles = GetTriangles();
-        Color[] colors = GetColors(vertices, 0f, mapElevation);
+        Color[] colors = GetColors(vertices, 0f, mapElevation, terrainColorGradient);
         chunkMesh.Clear();
         chunkMesh.vertices = vertices;
         chunkMesh.triangles = triangles;
@@ -69,10 +88,33 @@ public class MapGenerator : MonoBehaviour{
         chunk.GetComponent<MeshCollider>().sharedMesh = chunkMesh;
         chunk.GetComponent<MeshRenderer>().material = mapMaterial;
         chunk.transform.parent = transform;
-    }//end CreateChunk
+    }//end CreateChunkTerrain
 
 
-    Color[] GetColors(Vector3[] vertices, float minTerrainHeight, float maxTerrainHeight){
+
+    void CreateChunkWater(int xOrigin, float yOrigin, int zOrigin){
+        GameObject chunk = new GameObject("chunkWater");
+        chunk.gameObject.layer = 4;
+        chunk.AddComponent<MeshFilter>();
+        chunk.AddComponent<MeshRenderer>();
+        chunk.AddComponent<MeshCollider>();
+        Mesh chunkMesh = new Mesh();
+        Vector3[] vertices = GetVertices(xOrigin + mapXOrigin, yOrigin, zOrigin + mapZOrigin, waterOctaves, waterElevation, mapSeed, waterRedistribution, waterFrequency);
+        int[] triangles = GetTriangles();
+        Color[] colors = GetColors(vertices, 0f, mapElevation, waterColorGradient);
+        chunkMesh.Clear();
+        chunkMesh.vertices = vertices;
+        chunkMesh.triangles = triangles;
+        chunkMesh.colors = colors;
+        chunkMesh.RecalculateNormals();
+        chunk.GetComponent<MeshFilter>().mesh = chunkMesh;
+        chunk.GetComponent<MeshCollider>().sharedMesh = chunkMesh;
+        chunk.GetComponent<MeshRenderer>().material = mapMaterial;
+        chunk.transform.parent = transform;
+    }//end CreateChunkWater
+
+
+    Color[] GetColors(Vector3[] vertices, float minTerrainHeight, float maxTerrainHeight, Gradient colorGradient){
         Color[] colors = new Color[vertices.Length];
         for(int i = 0, z = 0; z <= chunkWidth; z++){
           for(int x = 0; x <= chunkLength; x++){
@@ -106,13 +148,14 @@ public class MapGenerator : MonoBehaviour{
     }//end GetTriangles
 
 
-    Vector3[] GetVertices(int xOrigin, int zOrigin){
+    Vector3[] GetVertices(int xOrigin, float yOrigin, int zOrigin, int octaves, float elevation, float seed, float redistribution, float frequency){
         Vector3[] vertices = new Vector3[(chunkLength + 1)*(chunkWidth + 1)];
         for(int z = 0, i = 0; z <= chunkWidth; z++){
             for(int x = 0; x <= chunkLength; x++){
-                float y = mapElevation * PerlinNoise.GetNoise(x + xOrigin, z + zOrigin, chunkLength, chunkWidth,
-                                                              mapSize, mapOctaves, mapSeed, mapRedistribution,
-                                                              mapFrequency);
+                float y = elevation * PerlinNoise.GetNoise(x + xOrigin, z + zOrigin, chunkLength, chunkWidth,
+                                                              mapSize, octaves, seed, redistribution,
+                                                              frequency);
+                y += yOrigin;
                 vertices[i] = new Vector3(x + xOrigin,y,z + zOrigin);
                 i++;
             }//end x
